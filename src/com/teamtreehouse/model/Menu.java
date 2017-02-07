@@ -124,12 +124,12 @@ public class Menu {
       float average = ((float) experiencedCount / team.getSize()) * 100;
       line();
       System.out.printf("Team: %s%n"
-                      + "Experienced players: %d%nInexperienced players: %d%n"
-                      + "Average experience: %.2f%% \n",
-                        team.getTeamName(),
-                        experiencedCount,
-                        inexperiencedCount,
-                        average);
+              + "Experienced players: %d%nInexperienced players: %d%n"
+              + "Average experience: %.2f%% \n",
+          team.getTeamName(),
+          experiencedCount,
+          inexperiencedCount,
+          average);
       line();
     }
   }
@@ -138,37 +138,46 @@ public class Menu {
     System.out.println("=================================");
   }
 
-  // Sorts team list by height starting from the shortest
+  // Sorts team list by height in a specific range
   private void heightReport() throws IOException {
-    List<Player> playersByHeight = new ArrayList<>();
     int teamIndex = selectTeam();
-    Collections.sort(teams.get(teamIndex).getPlayers(), new Comparator<Player>() {
+/*    Collections.sort(teams.get(teamIndex).getPlayers(), new Comparator<Player>() {
 
       @Override
       public int compare(Player o1, Player o2) {
         return Integer.compare(o1.getHeightInInches(), o2.getHeightInInches());
       }
-    });
+    });*/
     System.out.printf("Height report for %s%n", teams.get(teamIndex).getTeamName());
 
-    Map<String, Player> heightReport = new HashMap<>();
+    Map<String, List<Player>> heightMap = new HashMap<>();
+    List<Player> smallHeightList = new ArrayList<>();
+    List<Player> middleHeightList = new ArrayList<>();
+    List<Player> tallHeightList = new ArrayList<>();
+
     for (Player player : teams.get(teamIndex).getPlayers()) {
       if (player.getHeightInInches() <= 40) {
-        heightReport.put("35-40", player);
+        smallHeightList.add(player);
       } else if (player.getHeightInInches() > 40 && player.getHeightInInches() <= 46) {
-        heightReport.put("41-46", player);
+        middleHeightList.add(player);
       } else {
-        heightReport.put("47-50", player);
-      }
-
-      for (Map.Entry<String, Player> entry : heightReport.entrySet()) {
-        System.out.printf("Height %s : %s%n",
-                              entry.getKey(), entry.getValue().getPlayerInfo());
-        line();
-
+        tallHeightList.add(player);
       }
     }
+    heightMap.put("35-40", smallHeightList);
+    heightMap.put("41-46",middleHeightList);
+    heightMap.put("47-50",tallHeightList);
+    for (Map.Entry<String, List<Player>> entry : heightMap.entrySet()) {
+      if (!entry.getValue().isEmpty()) {
+        System.out.printf("Height range " + entry.getKey() + " :\n");
+      }
+      for (int i = 0; i < entry.getValue().size(); i++){
+        System.out.printf("%s\n", entry.getValue().get(i).getPlayerInfo());
+      }
+      line();
+    }
   }
+
 
   // Prints out team roster and checks if there is a
   // team available
@@ -176,6 +185,12 @@ public class Menu {
     if (isThereAnyTeam()) {
       int teamIndex = selectTeam();
       line();
+      Collections.sort(teams.get(teamIndex).getPlayers(), new Comparator<Player>() {
+        @Override
+        public int compare(Player o1, Player o2) {
+          return o1.getLastName().compareTo(o2.getLastName());
+        }
+      });
       System.out.printf("Team roster for team %s%n", teams.get(teamIndex).getTeamName());
       printTeam(teamIndex);
       line();
