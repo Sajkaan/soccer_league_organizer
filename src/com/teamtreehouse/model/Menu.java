@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -14,20 +15,15 @@ import java.util.Set;
 import java.util.TreeMap;
 
 public class Menu {
+  private static final int MAX_PLAYERS = Players.load().length;
+  private Set<Player> uniquePlayers = new HashSet<>(Arrays.asList(Players.load()));
   private List<Player> allPlayers;
   private List<Team> teams;
   private BufferedReader reader;
   private Map<String, String> menu;
 
-  public Menu (Player[] players) {
-    // Add all created players into a HashSet to
-    // check for duplicates and then insert into
-    // an ArrayList for easier handling the User
-    // input and finding the specific element
-    Set<Player> uniquePlayers = new HashSet<>();
-    for (int i = 0; i < players.length; i++) {
-      uniquePlayers.add(players[i]);
-    }
+  public Menu() {
+
     allPlayers = new ArrayList<>(uniquePlayers);
 
     Collections.sort(allPlayers);
@@ -71,7 +67,7 @@ public class Menu {
             break;
           case "create":
             // Check and create a new team
-            if (isNewTeamAllowed()){
+            if (isNewTeamAllowed()) {
               promptNewTeam();
             } else {
               System.out.println("Maximum number of teams is created.");
@@ -81,7 +77,7 @@ public class Menu {
             printRoster();
             break;
           case "exp":
-            expReport();
+            experienceReport();
             break;
           case "height":
             heightReport();
@@ -91,21 +87,22 @@ public class Menu {
             break;
           case "quit":
             System.out.println("YOU HAVE EXITED THE PROGRAM.");
+            System.exit(0);
             break;
           default:
             System.out.printf("Unknown choice: '%s' . Please try again. %n%n%n", choice);
         }
 
-      }catch (IOException ioe) {
+      } catch (IOException ioe) {
         System.out.println("Problem with input.");
         ioe.printStackTrace();
       }
 
-    }while(!choice.equals("quit"));
+    } while (!choice.equals("quit"));
   }
 
   // Experience report
-  private void expReport() {
+  private void experienceReport() {
     Map<Team, Integer> experiencedPlayerCount = new HashMap<>();
 
     for (Team team : teams) {
@@ -140,49 +137,46 @@ public class Menu {
 
   // Sorts team list by height in a specific range
   private void heightReport() throws IOException {
-    int teamIndex = selectTeam();
-/*    Collections.sort(teams.get(teamIndex).getPlayers(), new Comparator<Player>() {
+    if (isThereAnyTeam()) {
+      int teamIndex = selectTeam();
 
-      @Override
-      public int compare(Player o1, Player o2) {
-        return Integer.compare(o1.getHeightInInches(), o2.getHeightInInches());
-      }
-    });*/
-    System.out.printf("Height report for %s%n", teams.get(teamIndex).getTeamName());
+      System.out.printf("Height report for %s%n", teams.get(teamIndex).getTeamName());
 
-    Map<String, List<Player>> heightMap = new HashMap<>();
-    List<Player> smallHeightList = new ArrayList<>();
-    List<Player> middleHeightList = new ArrayList<>();
-    List<Player> tallHeightList = new ArrayList<>();
+      Map<String, List<Player>> heightMap = new HashMap<>();
+      List<Player> smallHeightList = new ArrayList<>();
+      List<Player> middleHeightList = new ArrayList<>();
+      List<Player> tallHeightList = new ArrayList<>();
 
-    for (Player player : teams.get(teamIndex).getPlayers()) {
-      if (player.getHeightInInches() <= 40) {
-        smallHeightList.add(player);
-      } else if (player.getHeightInInches() > 40 && player.getHeightInInches() <= 46) {
-        middleHeightList.add(player);
-      } else {
-        tallHeightList.add(player);
+      for (Player player : teams.get(teamIndex).getPlayers()) {
+        if (player.getHeightInInches() <= 40) {
+          smallHeightList.add(player);
+        } else if (player.getHeightInInches() > 40 && player.getHeightInInches() <= 46) {
+          middleHeightList.add(player);
+        } else {
+          tallHeightList.add(player);
+        }
       }
-    }
-    heightMap.put("35-40", smallHeightList);
-    heightMap.put("41-46",middleHeightList);
-    heightMap.put("47-50",tallHeightList);
-    for (Map.Entry<String, List<Player>> entry : heightMap.entrySet()) {
-      if (!entry.getValue().isEmpty()) {
-        System.out.printf("Height range " + entry.getKey() + " :\n");
+      heightMap.put("35-40", smallHeightList);
+      heightMap.put("41-46", middleHeightList);
+      heightMap.put("47-50", tallHeightList);
+      for (Map.Entry<String, List<Player>> entry : heightMap.entrySet()) {
+        if (!entry.getValue().isEmpty()) {
+          System.out.printf("Height range " + entry.getKey() + " :\n");
+        }
+        for (int i = 0; i < entry.getValue().size(); i++) {
+          System.out.printf("%s\n", entry.getValue().get(i).getPlayerInfo());
+        }
+        line();
       }
-      for (int i = 0; i < entry.getValue().size(); i++){
-        System.out.printf("%s\n", entry.getValue().get(i).getPlayerInfo());
-      }
-      line();
+    } else {
+      run();
     }
   }
 
 
-  // Prints out team roster and checks if there is a
-  // team available
   private void printRoster() throws IOException {
     if (isThereAnyTeam()) {
+      System.out.println("Select a team: ");
       int teamIndex = selectTeam();
       line();
       Collections.sort(teams.get(teamIndex).getPlayers(), new Comparator<Player>() {
@@ -200,14 +194,12 @@ public class Menu {
     }
   }
 
-
-  // Removes a player by asking first which
-  // team to select then remove a player from the list
   private void removePlayer() throws IOException {
     if (isThereAnyTeam()) {
+      System.out.print("\nRemove:\n");
       int teamIndex = selectTeam();
       printTeam(teamIndex);
-      System.out.print("\nSelect a player to remove: ");
+
       Player player = teams.get(teamIndex)
           .getPlayers()
           .get(inputForSelectingPlayers());
@@ -216,7 +208,6 @@ public class Menu {
       Collections.sort(allPlayers);
       System.out.printf("Removed %s %n", player.getPlayerInfo());
     } else {
-      System.out.println("No team available.");
       run();
     }
   }
@@ -229,34 +220,31 @@ public class Menu {
     }
   }
 
-  // Input for selecting players that converts String to int
   private int inputForSelectingPlayers() throws IOException {
+    int selectedPlayer;
     System.out.print("Select a player: ");
     String choice = reader.readLine();
-    int selectedPlayer = Integer.parseInt(choice);
+    selectedPlayer = Integer.parseInt(choice);
     return --selectedPlayer;
   }
 
-  // Adds the player to the team
   private void addPlayer() throws IOException {
     if (isThereAnyTeam()) {
+      System.out.println("Choose a team for adding players: ");
       int teamIndex = selectTeam();
       getAvailablePlayers();
       Player player = allPlayers.get(inputForSelectingPlayers());
 
-      // Adds the player to the team
       teams.get(teamIndex).addPlayer(player);
 
-      // Removes the player from the main list
       allPlayers.remove(player);
       Collections.sort(allPlayers);
-      System.out.printf("Added %s %n%n" ,player.getPlayerInfo());
+      System.out.printf("Added %s %n%n", player.getPlayerInfo());
     } else {
       run();
     }
   }
 
-  // Prints available players from the MAIN-LIST
   private void getAvailablePlayers() {
     int playerCount = 1;
     System.out.println("\nAvailable players: ");
@@ -274,9 +262,7 @@ public class Menu {
         player.getPlayerInfo());
   }
 
-  // Prompts for choosing teams
   private int selectTeam() throws IOException {
-    System.out.println("Choose a team for adding players: ");
     int nr = 1;
     for (Team team : teams) {
       System.out.printf("%d ). %s | managed by coach %s %n",
@@ -285,13 +271,12 @@ public class Menu {
           team.getCoachName());
       nr++;
     }
+    System.out.print("Input: ");
     String input = reader.readLine();
     int index = Integer.parseInt(input);
     return index - 1;
   }
 
-
-  // Ask the user for input of the team name and coach
   private void promptNewTeam() throws IOException {
     System.out.print("Enter the new team name: ");
     String teamname = reader.readLine();
@@ -305,20 +290,16 @@ public class Menu {
     System.out.printf("Team %s successfully added.%n%n", team.getTeamName());
   }
 
-  /* Checks if the maximum number of teams is reached
-     every team should have 11 players*/
   private boolean isNewTeamAllowed() {
-    int max = allPlayers.size() / 11;
-    if (max > teams.size()){
+    int max = MAX_PLAYERS / 11;
+    if (max > teams.size()) {
       return true;
     } else {
+      System.out.println("No new teams allowed.");
       return false;
     }
   }
 
-  /* Checks the number of teams, if there isn't any
-     team add,remove,roster and balance shouldn't
-     be able to select*/
   private boolean isThereAnyTeam() {
     if (teams.size() == 0) {
       System.out.println("No teams available. Please create a new team first.\n");

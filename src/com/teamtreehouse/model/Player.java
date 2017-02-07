@@ -17,10 +17,6 @@ public class Player implements Comparable<Player>, Serializable {
     this.previousExperience = previousExperience;
   }
 
-  public String getFirstName() {
-    return firstName;
-  }
-
   public String getLastName() {
     return lastName;
   }
@@ -34,24 +30,23 @@ public class Player implements Comparable<Player>, Serializable {
   }
 
   public String getPlayerInfo() {
-    String playerInfo;
     if (isPreviousExperience()) {
-      return playerInfo = String.format("%s %s, height: %d, has previous experience.",
-                                        firstName,
-                                        lastName,
-                                        heightInInches);
+      return String.format("%s %s, height: %d, has previous experience.",
+          firstName,
+          lastName,
+          heightInInches);
     } else {
-      return playerInfo = String.format("%s %s, height: %d, has no previous experience.",
-                                        firstName,
-                                        lastName,
-                                        heightInInches);
+      return String.format("%s %s, height: %d, has no previous experience.",
+          firstName,
+          lastName,
+          heightInInches);
     }
   }
 
   @Override
   public int compareTo(Player other) {
     // We always want to sort by last name then first name
-    if (equals(other)){
+    if (equals(other)) {
       return 0;
     }
     if (lastName.equals(other.lastName)) {
@@ -64,14 +59,24 @@ public class Player implements Comparable<Player>, Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Player)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Player)) {
+      return false;
+    }
 
     Player player = (Player) o;
 
-    if (heightInInches != player.heightInInches) return false;
-    if (previousExperience != player.previousExperience) return false;
-    if (!firstName.equals(player.firstName)) return false;
+    if (heightInInches != player.heightInInches) {
+      return false;
+    }
+    if (previousExperience != player.previousExperience) {
+      return false;
+    }
+    if (!firstName.equals(player.firstName)) {
+      return false;
+    }
     return lastName.equals(player.lastName);
 
   }

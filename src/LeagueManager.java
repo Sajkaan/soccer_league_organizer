@@ -8,10 +8,8 @@ public class LeagueManager {
     Player[] players = Players.load();
     System.out.printf("There are currently %d registered players.%n", players.length);
     System.out.println("=========SOCCER LEAGUE ORGANIZER==========");
-    Menu menu = new Menu(Players.load());
+    Menu menu = new Menu();
     menu.run();
-
-
   }
 
 }
