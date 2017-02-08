@@ -16,6 +16,7 @@ import java.util.TreeMap;
 
 public class Menu {
   private static final int MAX_PLAYERS = Players.load().length;
+  // To prevent duplication created a set then added it in a ArrayList for easier handling
   private Set<Player> uniquePlayers = new HashSet<>(Arrays.asList(Players.load()));
   private List<Player> allPlayers;
   private List<Team> teams;
@@ -160,11 +161,12 @@ public class Menu {
       heightMap.put("41-46", middleHeightList);
       heightMap.put("47-50", tallHeightList);
       for (Map.Entry<String, List<Player>> entry : heightMap.entrySet()) {
+
+          System.out.printf("Height range %s has %d player(s) with that height: %n", entry.getKey(), entry.getValue().size());
         if (!entry.getValue().isEmpty()) {
-          System.out.printf("Height range " + entry.getKey() + " :\n");
-        }
-        for (int i = 0; i < entry.getValue().size(); i++) {
-          System.out.printf("%s\n", entry.getValue().get(i).getPlayerInfo());
+          for (int i = 0; i < entry.getValue().size(); i++) {
+            System.out.printf("%s%n", entry.getValue().get(i).getPlayerInfo());
+          }
         }
         line();
       }
